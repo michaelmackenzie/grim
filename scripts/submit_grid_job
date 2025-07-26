@@ -69,7 +69,7 @@ if [ $xrootd == "xrootd" ] ; then
     fi
 fi
 
-parameters=$parameters" --jobsub-arg=--append_condor_requirements='(TARGET.CpuFamily==25)' --jobsub-arg=--auth-methods='token,proxy'"
+parameters=$parameters" --jobsub-arg=--append_condor_requirements='(TARGET.CpuFamily==25)' --jobsub-arg=--auth-methods='proxy'"
 
 # echo \* \<`date +%Y-%m-%d\ %a`\> *xxxxxxxx SUBMITTED* : $project.$idsid.$sub_stub          $p_time_xrootd
 
