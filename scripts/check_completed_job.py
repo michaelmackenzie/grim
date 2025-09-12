@@ -326,7 +326,7 @@ class Tool:
                         files = glob.glob(dd+'/*'+odsid+'*.'+ext)
                         nf = len(files)
                         if (nf != 1):
-                            print('>> segment %5i: ERROR'%i,' wrong number of files for stream ',odsid, ' : ',nf)
+                            print('>> segment %5i: ERROR'%i,'wrong number of files for stream',odsid, 'ext', ext, ':',nf)
                             error = error+1
 
             if (error == 0):
