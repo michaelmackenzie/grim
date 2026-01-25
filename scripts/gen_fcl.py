@@ -213,14 +213,16 @@ class Tool:
 #------------------------------------------------------------------------------
 # make FCL tarball 
 #------------------------------------------------------------------------------
-    def make_fcl_tarball(self,fcldir,tarball):
+    def make_fcl_tarball(self,fcldir,tarball, max_fcl = -1):
         name = 'make_fcl_tarbal';
 
         # print('>>> [make_fcl_tarball] fcldir:',fcldir,' tarball: ',tarball);
 
         # cmd     = ['su2020/scripts/make_fcl_tarball',fcldir,tarball]
 
-        cmd     = 'cd '+fcldir+'; tar -cjf '+tarball+' *.fcl';
+        if max_fcl > 0:  cmd = 'cd '+fcldir+'; tar -cjf '+tarball+ f' `ls *.fcl | head -n {max_fcl}`';
+        else:            cmd = 'cd '+fcldir+'; tar -cjf '+tarball+' *.fcl';
+        self.Print(name,1,"tarball command: " + cmd)
 
         process = subprocess.run(cmd,shell=True,capture_output=True,universal_newlines=True);
         
@@ -253,7 +255,7 @@ class Tool:
 # post-process directory with FCL files 
 # 
 #------------------------------------------------------------------------------
-    def postprocess_fcl_directory(self,fcldir,index):
+    def postprocess_fcl_directory(self,fcldir,index,max_fcl = -1):
         name = 'postprocess_fcl_directory'
 
         self.Print(name,1,'START')
@@ -269,7 +271,7 @@ class Tool:
 
         for i in range(0,nfiles):
             fcl_fn     = list_of_fcls[i]
-            self.Print(name,1,"i : %i, fcl_fn:%s"%(i,fcl_fn))
+            self.Print(name,2,"i : %i, fcl_fn:%s"%(i,fcl_fn))
 
             #------------------------------------------------------------------------------
             # form STNTUPLE filename
@@ -286,7 +288,7 @@ class Tool:
             fields[4]  = "%05i_"%i+fields[4]
             new_bn     = '.'.join(fields)
 
-            self.Print(name,1,"bn:%s, new_bn:%s:"%(bn,new_bn))
+            self.Print(name,2,"bn:%s, new_bn:%s:"%(bn,new_bn))
 
             new_fn     = new_bn
 
@@ -313,8 +315,8 @@ class Tool:
                 #------------------------------------------------------------------------------
                 # define STNTUPLE filename
                 #------------------------------------------------------------------------------
-                if (key == 'physics.analyzers.InitStntuple.histFileName'): 
-                    line  = 'physics.analyzers.InitStntuple.histFileName : \"'+stn_fn+'"\n'
+                if (key == 'physics.analyzers.InitStntuple.THistModule.histFileName'): 
+                    line  = 'physics.analyzers.InitStntuple.THistModule.histFileName : \"'+stn_fn+'"\n'
 
                 if ((len(kfields) == 3) and kfields[0] == 'outputs') and (kfields[2] == 'fileName'):
                     #------------------------------------------------------------------------------
@@ -323,7 +325,7 @@ class Tool:
                     dsn        = words[1]
                     nstreams   = self.fJob.n_output_streams();
                     dsn_fields = []
-                    self.Print(name,1,'nstreams:%i kfields[1]:%s line        :%s'%(nstreams,kfields[1],line.strip()))
+                    self.Print(name,2,'nstreams:%i kfields[1]:%s line        :%s'%(nstreams,kfields[1],line.strip()))
                     for i in range(0,nstreams):
                         if (self.fJob.output_stream(i) == kfields[1]):
                             # redefine the dataset ID
@@ -334,7 +336,7 @@ class Tool:
 
                     # print('2: dsn_fields:',dsn_fields)
                     line          = words[0]+":"+".".join(dsn_fields)
-                    self.Print(name,1,'updated line:%s'%line)
+                    self.Print(name,2,'updated line:%s'%line)
 
                 f1.write(line)     # substitute
 
@@ -375,7 +377,7 @@ class Tool:
             if (index >= 0): 
                 tarfile = name_stub+".%03i.fcl.tbz"%index
 
-            self.make_fcl_tarball(fcldir,tarfile);
+            self.make_fcl_tarball(fcldir,tarfile, max_fcl);
 
         self.Print(name,1,'END')
         return 0;
@@ -412,9 +414,10 @@ class Tool:
 #------------------------------------------------------------------------------
 # for testing purposes, allow to override the number of segments
 #-------v----------------------------------------------------------------------
-        if (self.fNSegments != None): nsegments = self.fNSegments
+        if (self.fNSegments != None)   : nsegments = self.fNSegments
+        if nsegments > job.fMaxSegments: nsegments = job.fMaxSegments
 
-        njobs           = int(nsegments-1/job.fMaxSegments) + 1;
+        njobs           = nsegments
         self.Print(name,1,'nsegments:%s njobs:%s'%(self.fNSegments,njobs))
 #-----------------------------------------------------------------------------------------
 # check if a subdirectory named '000' exist locally, if it does, rename it, 
@@ -623,7 +626,7 @@ class Tool:
 
             shutil.move('000',fcldir)
 
-            rc = self.postprocess_fcl_directory(fcldir,-1);
+            rc = self.postprocess_fcl_directory(fcldir,-1,njobs);
             if (rc < 0): 
                 return rc
 
