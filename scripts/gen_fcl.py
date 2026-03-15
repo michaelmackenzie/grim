@@ -296,6 +296,17 @@ class Tool:
                 new_fn = fcldir+'/'+new_bn
 
             os.rename(fcl_fn,new_fn);
+
+            #------------------------------------------------------------------------------
+            # form JSON filename
+
+            jfields    = bn.split('.').copy()
+
+            jfields[0] = 'jsn'
+            jfields[2] = job.output_dsid(0)
+            jfields[5] = 'json'
+            json_fn    = '.'.join(jfields)
+
 #------------------------------------------------------------------------------
 # re-read the FCL file and correct some things
 #------------------------------------------------------------------------------
@@ -317,6 +328,13 @@ class Tool:
                 #------------------------------------------------------------------------------
                 if (key == 'physics.analyzers.InitStntuple.THistModule.histFileName'): 
                     line  = 'physics.analyzers.InitStntuple.THistModule.histFileName : \"'+stn_fn+'"\n'
+
+                #------------------------------------------------------------------------------
+                # define JSON filename
+                #------------------------------------------------------------------------------
+                if (key == 'physics.analyzers.DumpJson.fileName'): 
+                    self.Print(name,2,"bn:%s, json_fn:%s:"%(bn,json_fn))
+                    line  = 'physics.analyzers.DumpJson.fileName : \"'+json_fn+'"\n'
 
                 if ((len(kfields) == 3) and kfields[0] == 'outputs') and (kfields[2] == 'fileName'):
                     #------------------------------------------------------------------------------
