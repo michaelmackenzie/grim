@@ -435,7 +435,7 @@ class Tool:
         if (self.fNSegments != None)   : nsegments = self.fNSegments
         if nsegments > job.fMaxSegments: nsegments = job.fMaxSegments
 
-        njobs           = nsegments
+        njobs           = int(nsegments)
         self.Print(name,1,'nsegments:%s njobs:%s'%(self.fNSegments,njobs))
 #-----------------------------------------------------------------------------------------
 # check if a subdirectory named '000' exist locally, if it does, rename it, 

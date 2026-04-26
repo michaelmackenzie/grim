@@ -26,6 +26,7 @@ class Tool:
         self.fMuseStub      = os.getenv('MUSE_STUB')
         self.fGridJobID     = None;
         self.fConfig        = {}
+        self.fTarballExtras = ''
 
         self.fOutputPath    = {}
         self.fOutputStreams = None
@@ -56,7 +57,7 @@ class Tool:
         self.Print(name,2, '%s' % sys.argv)
 
         try:
-            optlist, args = getopt.getopt(sys.argv[1:], '', ['project=','muse-stub=','verbose='])
+            optlist, args = getopt.getopt(sys.argv[1:], '', ['project=','muse-stub=','verbose=', 'extras='])
  
         except getopt.GetoptError:
             self.Print(name,0,'%s' % sys.argv)
@@ -73,6 +74,8 @@ class Tool:
                 self.fMuseStub = val
             elif key == '--verbose':
                 self.fVerbose = int(val)
+            elif key == '--extras':
+                self.fTarballExtras = val
 
         self.Print(name,1,'Project    = %s' % self.fProject)
         self.Print(name,1,'Verbose    = %s' % self.fVerbose)
@@ -102,6 +105,7 @@ class Tool:
         cmd += 'setup muse -q '+qual+'; '
 
         cmd += 'muse tarball -x '+exclude_file;
+        cmd += ' ' + self.fTarballExtras
 
         # cmd='echo A; echo B'
         print(sys.version);
